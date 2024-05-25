@@ -1,9 +1,27 @@
 class WatchesController < ApplicationController
+  include Orderable
+  
+  before_action :authenticate_user!, except: [:index, :show]
   before_action :set_watch, only: %i[ show update destroy ]
+
+  # Filters:
+  # /api/v1/experiences?by_price[from]=100&by_price[to]=999
+  # /api/v1/experiences?by_category=1,2,3
+  # /api/v1/experiences?by_city=1,2,3
+  # /api/v1/experiences?by_duration[from]=10&by_duration[to]=60
+  #
+  has_scope :by_category, only: :index
+  has_scope :by_name, only: :index
+  has_scope :by_price, using: [:from, :to], only: :index
+  has_scope :by_description, only: :index
+  has_scope :by_url, only: :index
 
   # GET /watches
   def index
-    @watches = Watch.all
+    @watches = 
+      apply_scopes(Watch)
+      .order(ordering_params(params))
+      .all
 
     render json: @watches
   end
