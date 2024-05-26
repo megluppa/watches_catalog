@@ -2,6 +2,9 @@ class Watch < ApplicationRecord
   CATEGORIES = ['standard','premium','premium+']
 
   validates_inclusion_of :category, :in => CATEGORIES
+  validates :name, presence: true
+  validates :price, presence: true
+  validates :category, presence: true
 
   scope :by_category, -> (category) { where(category: category) }
   scope :by_name, -> (name) { where("name LIKE ?", "%#{Watch.sanitize_sql_like(name)}%") }

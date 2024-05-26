@@ -39,7 +39,6 @@ gem "devise"
 
 gem "devise-jwt"
 
-gem 'jsonapi-serializer'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -52,4 +51,8 @@ group :development do
 end
 
 
+group :test do
+  gem "minitest-rails", "~> 7.1.0"
+  gem 'database_cleaner-active_record'
+end
 gem "has_scope", "~> 0.8.2"

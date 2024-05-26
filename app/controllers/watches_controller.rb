@@ -3,13 +3,9 @@ class WatchesController < ApplicationController
   
   before_action :authenticate_user!, except: [:index, :show]
   before_action :set_watch, only: %i[ show update destroy ]
+  before_action :require_permission, only: [:update, :destroy]
 
-  # Filters:
-  # /api/v1/experiences?by_price[from]=100&by_price[to]=999
-  # /api/v1/experiences?by_category=1,2,3
-  # /api/v1/experiences?by_city=1,2,3
-  # /api/v1/experiences?by_duration[from]=10&by_duration[to]=60
-  #
+
   has_scope :by_category, only: :index
   has_scope :by_name, only: :index
   has_scope :by_price, using: [:from, :to], only: :index
@@ -34,6 +30,7 @@ class WatchesController < ApplicationController
   # POST /watches
   def create
     @watch = Watch.new(watch_params)
+    @watch.user_id = current_user.id
 
     if @watch.save
       render json: @watch, status: :created, location: @watch
@@ -65,5 +62,11 @@ class WatchesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def watch_params
       params.require(:watch).permit(:name, :description, :category, :price, :url)
+    end
+
+    def require_permission
+      if current_user.id != @watch.user_id
+        render json: { status: 403, error: "Access Denied", exception: "User is not creator of this watch" }
+      end
     end
 end
