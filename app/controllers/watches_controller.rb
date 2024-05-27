@@ -3,7 +3,7 @@ class WatchesController < ApplicationController
   
   before_action :authenticate_user!, except: [:index, :show]
   before_action :set_watch, only: %i[ show update destroy ]
-  before_action :require_permission, only: [:update, :destroy]
+  #before_action :require_permission, only: [:update, :destroy]
 
 
   has_scope :by_category, only: :index
@@ -41,7 +41,9 @@ class WatchesController < ApplicationController
 
   # PATCH/PUT /watches/1
   def update
-    if @watch.update(watch_params)
+    if current_user.id != @watch.user_id
+        render json: { status: 403, error: "Access Denied", exception: "User is not creator of this watch" }, status: 403
+    elsif @watch.update(watch_params)
       render json: @watch
     else
       render json: @watch.errors, status: :unprocessable_entity
